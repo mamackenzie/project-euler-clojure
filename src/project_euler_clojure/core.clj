@@ -16,7 +16,8 @@
 
 (defn is-factor
   "Determine if y is a factor of x"
-  [x y] (= 0 (rem x y)))
+  [x y]
+  (= 0 (rem x y)))
 
 (def prime?
   "Determine if a number is prime"
@@ -73,10 +74,6 @@
   (map (fn [y] [y (degree-of-factor x y)])
        (prime-factors x)))
 
-; in:   vector of factorizations
-; out:  vector of the union of all of the factors of the given factorizations
-;       with degree being the highest degree for that factor out of all of
-;       the input factorizations
 (defn merge-factorizations
   "Given a sequence of factorizations (like those returned from
   prime-factorization), return a map with keys consisting of the union of
