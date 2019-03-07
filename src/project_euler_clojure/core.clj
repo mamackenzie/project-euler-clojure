@@ -28,9 +28,26 @@
                   (iterate (partial + 2)
                            3)))))
 
+(defn logarithm [base x]
+  (/ (Math/log x) (Math/log base)))
+
 (defn prime-factors [x]
   (filter (partial is-factor x)
-          (take-while (partial > (Math/sqrt x)) (primes))))
+          (take-while (partial > (inc (Math/ceil (Math/sqrt x)))) (primes))))
+
+(defn degree-of-factor [x y]
+  (letfn [(inner [curr degree]
+            (if (= 0 (mod curr y))
+              (recur (/ curr y) (inc degree))
+              degree))]
+    (inner x 0)))
+
+(defn prime-factorization [x]
+  (map (fn [y] [y (degree-of-factor x y)])
+       (prime-factors x)))
+
+(defn merge-factorizations [facs]
+  )
 
 
 ;============================================================================
@@ -58,10 +75,10 @@
 (defn problem-4 []
   (letfn [(square [x]
             (* x x))]
-    (- (square (reduce + (range 1 101)))
+    (- (square (reduce +
+                       (range 1 101)))
        (reduce +
-               (map square
-                    (range 1 101))))))
+               (map square (range 1 101))))))
 
 (def problem-5 "incomplete")
 
@@ -69,6 +86,7 @@
 ;============================================================================
 ; Main (just prints out solutions)
 ;============================================================================
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
