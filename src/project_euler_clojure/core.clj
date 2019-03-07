@@ -1,6 +1,7 @@
 (ns project-euler-clojure.core
   (:gen-class))
 
+
 ;============================================================================
 ; Helper functions
 ;============================================================================
@@ -14,40 +15,66 @@
 
 (defn is-factor [x y] (= 0 (rem x y)))
 
-(defn prime? [x]
-  (case x
-    2 true
-    (= 0 (count (filter (partial is-factor x)
-                        (range 2
-                               (+ 1 (Math/ceil (Math/sqrt x)))))))))
+(def prime?
+  (memoize (fn [x]
+             (case x
+               (0 1) false
+               2 true
+               (= 0 (count (filter (partial is-factor x)
+                                   (range 2
+                                          (+ 1 (Math/ceil (Math/sqrt x)))))))))))
 
 (defn primes []
   (lazy-seq
     (cons 2
-          (filter (memoize prime?)
+          (filter prime?
                   (iterate (partial + 2)
                            3)))))
 
 (defn logarithm [base x]
   (/ (Math/log x) (Math/log base)))
 
-(defn prime-factors [x]
-  (filter (partial is-factor x)
-          (take-while (partial > (inc (Math/ceil (Math/sqrt x)))) (primes))))
-
-(defn degree-of-factor [x y]
+(defn degree-of-factor [num factor]
   (letfn [(inner [curr degree]
-            (if (= 0 (mod curr y))
-              (recur (/ curr y) (inc degree))
+            (if (= 0 (mod curr factor))
+              (recur (/ curr factor) (inc degree))
               degree))]
-    (inner x 0)))
+    (inner num 0)))
+
+(defn prime-factors [x]
+  (let [small-pfs
+        (filter (partial is-factor x)
+                (take-while (partial > (inc (int (Math/sqrt x)))) (primes)))]
+    (apply conj
+           (filter prime?
+                   (conj (map (fn [y] (/ x (int (Math/pow y (degree-of-factor x y)))))
+                              small-pfs)
+                         x))
+           small-pfs)))
 
 (defn prime-factorization [x]
   (map (fn [y] [y (degree-of-factor x y)])
        (prime-factors x)))
 
-(defn merge-factorizations [facs]
-  )
+; in:   vector of factorizations
+; out:  vector of the union of all of the factors of the given factorizations
+;       with degree being the highest degree for that factor out of all of
+;       the input factorizations
+(defn merge-factorizations [factorizations]
+  (loop [max-deg-factors (sorted-map)
+
+         ; flattens a single level, giving us a sequence of all factors
+         ; and degrees of all factorizations
+         remaining (mapcat identity factorizations)]
+
+    (if (empty? remaining)
+      max-deg-factors
+
+      (let [curr-factor (first (first remaining))
+            curr-degree (second (first remaining))
+            max-degree (max (get max-deg-factors curr-factor 0) curr-degree)]
+        (recur (assoc max-deg-factors curr-factor max-degree)
+               (rest remaining))))))
 
 
 ;============================================================================
@@ -80,7 +107,10 @@
        (reduce +
                (map square (range 1 101))))))
 
-(def problem-5 "incomplete")
+(def problem-5
+    (reduce *
+            (map (fn [x] (int (apply #(Math/pow %1 %2) x)))
+                 (merge-factorizations (map prime-factorization (range 1 21))))))
 
 
 ;============================================================================
