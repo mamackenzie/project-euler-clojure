@@ -63,13 +63,6 @@
                               (take-nth i (range n))))
        (recur n (inc i) curr-primes)))))
 
-
-
-
-(defn eratosthenes []
-
-  (println "hola"))
-
 (defn logarithm
   "Compute logarithm of x in the given base"
   [base x]
@@ -217,9 +210,6 @@
        (reduce +
                (map square (range 1 101))))))
 
-;; By listing the first six prime numbers: 2, 3, 5, 7, 11, and 13, we can see
-;; that the 6th prime is 13.
-;;
 ;; What is the 10 001st prime number?
 (defn problem-7 []
   (last (take 10001 (primes))))
@@ -302,16 +292,18 @@
                   01 70 54 71 83 51 54 69 16 92 33 48 61 43 52 01 89 19 67 48"
                  #"\s+"))
         indeces (filter #(and (>= 16 (mod % 20)) (>= 336 %)) (range 400))
-        adjacents [[0 1 2 3] [20 21 22 23] [40 41 42 43] [60 61 62 63]
-                   [0 20 40 60] [1 21 41 61] [2 22 42 62] [3 33 43 63]
-                   [0 21 42 63] [60 41 22 3]]
+        adjacency-offsets [[0 1 2 3] [20 21 22 23] [40 41 42 43] [60 61 62 63]
+                           [0 20 40 60] [1 21 41 61] [2 22 42 62] [3 33 43 63]
+                           [0 21 42 63] [60 41 22 3]]
 
-        submatrix (fn [i]
-                    (map (fn [j] (map #(+ i %) j))
-                         adjacents))
+        ;; get a list of all of the 4-element adjacent subsequences of the 4x4 matrix
+        ;; rooted at index i
+        adjacent-sequences-for-submatrix (fn [i]
+                                           (map (fn [j] (map #(+ i %) j))
+                                                adjacency-offsets))
 
         submatrices (mapcat identity
-                            (map #(submatrix %) indeces))]
+                            (map #(adjacent-sequences-for-submatrix %) indeces))]
 
     (map #(mapv (vec v) %) submatrices)))
 
