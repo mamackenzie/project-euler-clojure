@@ -9,8 +9,7 @@
 (ns project-euler-clojure.core
   (:require [clojure.math.combinatorics :as combo]
             [clojure.tools.namespace.repl :refer [refresh]]
-            [clojure.string :as str]
-            [clojure.set :as zet])
+            [clojure.string :as str])
   (:gen-class))
 
 
@@ -311,6 +310,22 @@
   [])
 
 
+(defn problem-13
+  []
+  (let [sum (reduce + (map bigint (str/split-lines (slurp "resources/problem-13-nums"))))]
+    sum))
+
+
+
+(defn collatz
+  ([n]
+   (collatz n []))
+
+  ([n L]
+   (cond (= 1 n) (conj L 1)
+         (even? n) (recur (/ n 2) (conj L n))
+         (odd? n) (recur (+ 1 (* 3 n)) (conj L n)))))
+
 
 ;;============================================================================
 ;; Main (just prints out solutions)
@@ -330,6 +345,5 @@
                   ["Special Pythagorean triplet" problem-9]
                   ["Summation of primes" problem-10]
                   ["Largest product in a grid" problem-11]]]
-    (doseq [problem problems]
-      (let [soln (problem)]
-        (println (first soln) (second soln))))))
+    (doseq [[problem-name problem-fn] problems]
+      (println problem-name (problem-fn)))))
